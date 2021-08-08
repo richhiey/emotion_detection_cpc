@@ -39,7 +39,7 @@ statement = {"01": "Kids are talking by the door", "02": "Dogs are sitting by th
 
 
 def parse_filename(filepath):
-    """ extract meaning from emotion dataset filenames """
+    """extract meaning from emotion dataset filenames"""
     filename = filepath.split("/")[-1].split(".")[0]  # e.g. 03-01-04-02-02-02-02
     m, v, e, i, s, r, a = filename.split("-")
 

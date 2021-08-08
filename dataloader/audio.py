@@ -46,7 +46,7 @@ class AudioDataLoader(DataLoader):
         feats, labels, files, positions = [], [], [], []
         for path, label in batch:
             start_idx = 0
-            audio_tensor, sample_rate = torchaudio.load(path, normalization=normalization)
+            audio_tensor, sample_rate = torchaudio.load(path)
             if sample_rate != RAW_SAMPLING_RATE:
                 audio_tensor = torchaudio.transforms.Resample(sample_rate, RAW_SAMPLING_RATE)(
                     audio_tensor

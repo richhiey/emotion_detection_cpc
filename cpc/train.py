@@ -82,15 +82,17 @@ def save_models(model, model_out, ext, data=None):
         _ = trained_model(data)
 
 
-def train(model, optimizer, scheduler, train_dataloader, val_dataloader, FLAGS):
+def train(model, optimizer, scheduler, train_dataloader, val_dataloader, tot_steps, FLAGS):
     model.train()
 
     tb_logger = SummaryWriter(FLAGS.expdir, flush_secs=10)
     best_loss = np.inf
     hidden = None
     sampling_rate = train_dataloader.sampling_rate
-
+    final_step = 0
     for step, train_batch in enumerate(train_dataloader):
+        step = tot_steps + step
+        final_step = step
         data = train_batch["data"].to(device)
         if FLAGS.features_in == "raw":
             data = mu_law_encoding(data.unsqueeze(1))
@@ -158,6 +160,7 @@ def train(model, optimizer, scheduler, train_dataloader, val_dataloader, FLAGS):
             ext = ""
             save_models(model, FLAGS.model_out, ext)
             break
+    return model, final_step
 
 
 def run_cpc(unused_argv):
@@ -220,7 +223,19 @@ def run_cpc(unused_argv):
     )
 
     # start training
-    train(model, optimizer, scheduler, train_dataloader, val_dataloader, FLAGS)
+    epochs = 1000
+    step = 0
+    for epoch in range(epochs):
+        model, step = train(
+            model, optimizer, scheduler, train_dataloader, val_dataloader, step, FLAGS
+        )
+        print("---------------------------------")
+        print(step)
+        print(model)
+        if step >= FLAGS.steps:
+            print("We have reached end of training at " + str(step) + " steps!")
+            print(model)
+            break
 
 
 if __name__ == "__main__":
